@@ -24,6 +24,7 @@ class SGDLatticeQuantizerOptimizer:
         We use the permuted congruential generator, which is well documented
         and fulfills advanced tests of randomness.
         """
+        return generate_random_reals(x)
 
     def clp(self, x, y):
         """
