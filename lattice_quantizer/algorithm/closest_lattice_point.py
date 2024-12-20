@@ -14,7 +14,9 @@ def validate_input(G, r):
         raise ValueError("G must be lower triangular.")
 
 
-def new_G_based_lattices(G, r) -> np.ndarray:
+def new_G_based_lattices(
+    G: np.ndarray, r: np.ndarray, debug: bool = True
+) -> np.ndarray:
     """
     Compute the closest lattice point to the received vector r.
 
@@ -25,7 +27,8 @@ def new_G_based_lattices(G, r) -> np.ndarray:
     Returns:
         numpy.ndarray: Indexes of the closest lattice vector.
     """
-    validate_input(G, r)
+    if debug:
+        validate_input(G, r)
     return _new_G_based_lattices(G.shape[0], G, r)
 
 
