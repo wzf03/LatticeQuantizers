@@ -1,4 +1,4 @@
-import machine
+# import machine
 import time
 
 class PCG32Random:
@@ -13,7 +13,7 @@ class PCG32Random:
         inc (int): The increment used for the generator's state update (64 bits).
     """
 
-    def __init__(self, seed=None, inc=None):
+    def __init__(self, seed=42, inc=None):
         """
         Initializes the PCG32 random number generator with an optional seed and increment.
         If no seed is provided, the generator will use the device's unique ID 
@@ -23,9 +23,9 @@ class PCG32Random:
             seed (int, optional): The initial seed for the generator (64-bit). 
             inc (int, optional): The increment for the state update (64-bit).
         """
-        if seed is None:
+        # if seed is None:
             # Use the device's unique ID and current time as a seed for more variability
-            seed = int.from_bytes(machine.unique_id(), 'big') + int(time.ticks_ms())
+            # seed = int.from_bytes(machine.unique_id(), 'big') + int(time.ticks_ms())
         if inc is None:
             inc = 1  # Default increment
 

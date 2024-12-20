@@ -4,7 +4,7 @@ from LLL_algo import red
 from PCG32random import generate_random_reals
 from tqdm import tqdm
 from algorithm.closest_lattice_point import new_G_based_lattices as clp_ngbl
-
+import pdb
 
 class SGDLatticeQuantizerOptimizer:
     def __init__(self, dimension: int):
@@ -121,6 +121,7 @@ def parse_arg() -> argparse.Namespace:
 
 
 def main():
+    pdb.set_trace()
     args = parse_arg()
     dimen_n = args.dimension
 

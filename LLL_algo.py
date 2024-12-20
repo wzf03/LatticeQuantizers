@@ -31,8 +31,12 @@ def gramschmidt(V):
 
     for v in V:
         temp = np.array(v)
+        # for u in U:
+        #     temp = np.array(temp) - projection(u, v)
+        sum_u=0
         for u in U:
-            temp = np.array(temp) - projection(u, v)
+            sum_u+=projection(u, v)
+        temp = np.array(temp) - sum_u
 
         if np.any(temp):
             U.append(temp.tolist())
@@ -60,13 +64,17 @@ def red(basis):
 
     def coef(i, j):  # helper for LLL
         return dot_product(basis[i], o_basis[j]) / dot_product(o_basis[j], o_basis[j])
-
-    while k < n:
+    iter=0
+    while k < n :
+        # iter+=1
         for j in range(k - 1, -1, -1):
+
             # Reduction step
             mu1 = coef(k, j)
-            basis[k] = np.array(basis[k]) - (round(mu1) * np.array(basis[j]))
-            o_basis = gramschmidt(basis)
+            if abs(mu1) > 0.5: 
+                basis[k] = np.array(basis[k]) - (round(mu1) * np.array(basis[j]))
+
+                o_basis = gramschmidt(basis)
 
         # Check for Lovász Condition
         mu2 = coef(k, k - 1)
@@ -76,8 +84,67 @@ def red(basis):
             k += 1
         else:
             # Swap step
-            basis[k], basis[k - 1] = basis[k - 1], basis[k]
+            tmp=basis[k]
+            basis[k]=basis[k - 1]
+            basis[k - 1] = tmp
             o_basis = gramschmidt(basis)
             k = max(k - 1, 1)
+        if iter==10:
+            break
 
     return basis
+
+def red_gpt(B, delta=0.75):
+
+    
+    B = B.astype(float)  # 确保 B 是浮点数矩阵
+    m, n = B.shape
+
+    # Gram-Schmidt 初始化
+    def gram_schmidt(B):
+        B_star = np.zeros_like(B)
+        mu = np.zeros((n, n))
+        for i in range(n):
+            B_star[:, i] = B[:, i]
+            for j in range(i):
+                mu[i, j] = np.dot(B[:, i], B_star[:, j]) / np.dot(B_star[:, j], B_star[:, j])
+                B_star[:, i] -= mu[i, j] * B_star[:, j]
+        return B_star, mu
+
+    B_star, mu = gram_schmidt(B)
+    k = 1
+    while k < n:
+        # Size reduction
+        for j in range(k-1, -1, -1):
+            r = round(mu[k, j])  # 允许四舍五入处理浮点数
+            if r != 0:
+                B[:, k] -= r * B[:, j]
+                for l in range(j+1):
+                    mu[k, l] -= r * mu[j, l]
+                B_star[:, k] -= r * B_star[:, j]
+
+        # 检查 Lovász 条件
+        if np.dot(B_star[:, k], B_star[:, k]) >= (delta - mu[k, k-1]**2) * np.dot(B_star[:, k-1], B_star[:, k-1]):
+            k += 1
+        else:
+            # 交换列向量并重新计算 Gram-Schmidt
+            B[:, [k, k-1]] = B[:, [k-1, k]]
+            B_star, mu = gram_schmidt(B)
+            k = max(k-1, 1)
+    return B
+
+if __name__=="__main__":
+
+    # basis = np.array([
+    #     [1.0, 0.5, 0.3],
+    #     [0.5, 1.0, 0.7],
+    #     [0.3, 0.7, 1.0]
+    # ])
+    basis=np.array([[1,-1,3],[1,0,5],[1,2,6]])
+    print(red(basis)) # [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1], [0, 0, 0], [1, 1, 1], [0, 0, 0]]
+
+    
+
+
+
+
