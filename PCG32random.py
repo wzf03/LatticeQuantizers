@@ -1,15 +1,3 @@
-## PCG32 Random Number Generator in Python (Micropython port) ##
-# Original Source:   PCG Random Number Generation for C
-# Minimal C Implementation
-# Copyright 2014 Melissa O'Neill <oneill@pcg-random.org>
-# http://www.pcg-random.org
-#
-# This is the Python implementation of the PCG32 random number generator, ported
-# from the C  for use on embedded systems like ESP32, RP2040, Pybaord.
-# This implementation uses the PCG32 (Permuted Congruential Generator) method. 
-# https://github.com/MicroControleurMonde
-# PCG32_Minimal_Port_PyBoard.py
-
 import machine
 import time
 
