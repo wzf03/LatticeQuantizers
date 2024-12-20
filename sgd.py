@@ -50,7 +50,8 @@ class SGDLatticeQuantizerOptimizer:
         of (2), orthogonal transformation corresponds to right-multiplying the
         generator matrix by a semiorthogonal matrix R.
         """
-        pass
+        A = np.dot(x, x.T)
+        return np.linalg.cholesky(A)
 
 
 def parse_arg() -> argparse.Namespace:
