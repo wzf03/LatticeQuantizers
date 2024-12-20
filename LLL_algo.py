@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def dot_product(vec1, vec2):
     """
     Dot product of two vectors.
@@ -37,6 +38,7 @@ def gramschmidt(V):
             U.append(temp.tolist())
 
     return U
+
 
 def red(basis):
     """
