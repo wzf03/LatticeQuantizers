@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 from LLL_algo import red
+
 # from PCG32random import generate_random_reals
 from tqdm import tqdm
 from lattice_quantizer.algorithm import closest_lattice_point as clp
@@ -122,7 +123,6 @@ def parse_arg() -> argparse.Namespace:
 
 
 def main():
-    pdb.set_trace()
     args = parse_arg()
     dimen_n = args.dimension
 

@@ -23,6 +23,7 @@ def new_G_based_lattices(
     Args:
         r (numpy.ndarray): Input row vector.
         G (numpy.ndarray): Lower triangular generator matrix.
+        debug (bool): If True, validate the input.
 
     Returns:
         numpy.ndarray: Indexes of the closest lattice vector.
