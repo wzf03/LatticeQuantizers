@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 from LLL_algo import red
-from PCG32random import generate_random_reals
+# from PCG32random import generate_random_reals
 from tqdm import tqdm
 from lattice_quantizer.algorithm import closest_lattice_point as clp
 
@@ -26,7 +26,8 @@ class SGDLatticeQuantizerOptimizer:
         We use the permuted congruential generator, which is well documented
         and fulfills advanced tests of randomness.
         """
-        return generate_random_reals(x)
+        # return generate_random_reals(x)
+        return np.random.rand(x)
 
     def clp(self, G, r):
         """
