@@ -122,6 +122,7 @@ def parse_arg() -> argparse.Namespace:
 
 
 def main():
+    pdb.set_trace()
     args = parse_arg()
     dimen_n = args.dimension
 
