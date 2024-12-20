@@ -29,7 +29,7 @@ def new_G_based_lattices(G, r) -> np.ndarray:
     return _new_G_based_lattices(G.shape[0], G, r)
 
 
-# @numba.njit
+@numba.njit
 def _new_G_based_lattices(n: int, G: np.ndarray, r: np.ndarray) -> np.ndarray:
     """
     Args:
