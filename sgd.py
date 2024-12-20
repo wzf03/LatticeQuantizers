@@ -14,7 +14,7 @@ def gran(x, y):
     return np.random.randn(x, y)
 
 
-def uran(x):
+def uran(n):
     """
     URAN (n) returns n random real numbers, which are uniformly distributed
     in [0, 1) and independent of each other. Interpreted as a vector, URAN (n)
@@ -22,7 +22,7 @@ def uran(x):
     We use the permuted congruential generator, which is well documented
     and fulfills advanced tests of randomness.
     """
-    
+    return generate_random_reals(n)
 
 
 def clp(x, y):
