@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lattice_quantizer"
+version = "0.0.1"
+dependencies = [
+  "numpy",
+  "numba",
+  "tqdm"
+]
+requires-python = ">=3.8"
