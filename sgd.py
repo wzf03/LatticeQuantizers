@@ -2,7 +2,11 @@ import argparse
 import numpy as np
 from LLL_algo import red
 from PCG32random import generate_random_reals
+<<<<<<< Updated upstream
 from tqdm import tqdm
+=======
+from algorithm.closest_lattice_point import new_G_based_lattices as clp_ngbl
+>>>>>>> Stashed changes
 
 
 class SGDLatticeQuantizerOptimizer:
@@ -38,7 +42,7 @@ class SGDLatticeQuantizerOptimizer:
         with positive diagonal elements, which is exactly how lattices are represented
         in Algorithm 1.
         """
-        pass
+        return clp_ngbl(self.dimension, x, y)
 
     def orth(self, x):
         """
