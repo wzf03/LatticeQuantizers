@@ -6,7 +6,7 @@ from lattice_quantizer.algorithm import closest_lattice_point as clp
 from lattice_quantizer.algorithm import lattice_basis_reduction as lbr
 
 
-@njit(float64[:, :](types.npy_rng, int32))
+@njit(float64[:, :](types.npy_rng, int32), inline="always")
 def _gran(rng: np.random.Generator, n: int) -> np.ndarray:
     """
     GRAN returns an n * m matrix of random independent real numbers,
@@ -16,7 +16,7 @@ def _gran(rng: np.random.Generator, n: int) -> np.ndarray:
     return rng.normal(0, 1, (n, n))
 
 
-@njit(float64[:](types.npy_rng, int32))
+@njit(float64[:](types.npy_rng, int32), inline="always")
 def _uran(rng: np.random.Generator, n: int) -> np.ndarray:
     """
     URAN (n) returns n random real numbers, which are uniformly distributed
@@ -28,7 +28,7 @@ def _uran(rng: np.random.Generator, n: int) -> np.ndarray:
     return rng.random(n)
 
 
-@njit(int64[:](float64[:, :], float64[:]))
+@njit(int64[:](float64[:, :], float64[:]), inline="always")
 def _clp(generator: np.ndarray, r: np.ndarray) -> np.ndarray:
     """
     The closest lattice point function CLP (B, x) finds the point in the lattice
@@ -43,7 +43,7 @@ def _clp(generator: np.ndarray, r: np.ndarray) -> np.ndarray:
     return clp.closest_lattice_point(generator, r)
 
 
-@njit(float64[:, :](float64[:, :]))
+@njit(float64[:, :](float64[:, :]), inline="always")
 def _orth(x: np.ndarray) -> np.ndarray:
     """
     The orthogonal transformation function ORTH (B) rotates and reflects an
@@ -58,7 +58,7 @@ def _orth(x: np.ndarray) -> np.ndarray:
     return np.linalg.cholesky(x @ x.T)
 
 
-@njit(float64[:, :](float64[:, :]))
+@njit(float64[:, :](float64[:, :]), inline="always")
 def _red(basis: np.ndarray) -> np.ndarray:
     """
     The reduction function RED(B) returns another generator matrix for the
@@ -102,7 +102,7 @@ def _step(
     if t % reduction_interval == reduction_interval - 1:
         basis = _orth(_red(basis))
         volume = np.prod(np.diag(basis))
-        basis = (volume ** (-1 / n)) * basis
+        basis[:] = (volume ** (-1 / n)) * basis
 
 
 @njit(cache=True)
@@ -128,9 +128,9 @@ class SGDLatticeQuantizerOptimizer:
         dimension: int,
         initial_step_size: float = 0.001,
         radio: int = 500,
-        steps: int = 10000000,
+        steps: int = 10_000_000,
         reduction_interval: int = 100,
-        log_interval: int = 1000,
+        log_interval: int = 10000,
     ):
         self.dimension = dimension
         self.initial_step_size = initial_step_size

@@ -43,7 +43,7 @@ def parse_arg() -> argparse.Namespace:
         "--steps",
         type=int,
         required=False,
-        default=10000000,  # Medium: 10000000; Fast: 1000000; Slow: 100000000
+        default=10_000_000,  # Medium: 10000000; Fast: 1000000; Slow: 100000000
         help="Number of steps for the stochastic gradient descent",
     )
 
