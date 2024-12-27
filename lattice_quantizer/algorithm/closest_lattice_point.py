@@ -1,12 +1,12 @@
-import numba
 import numpy as np
-from numba import float64, int64
+from numba import float64, int64, njit
 
 
-@numba.njit(
+@njit(
     [
         int64[:](float64[:, :], float64[:]),
-    ]
+    ],
+    cache=True,
 )
 def closest_lattice_point(G: np.ndarray, r: np.ndarray) -> np.ndarray:
     """

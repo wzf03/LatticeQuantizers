@@ -1,11 +1,10 @@
 from typing import Tuple
 
-import numba
 import numpy as np
-from numba import boolean, float64
+from numba import boolean, float64, njit, types
 
 
-@numba.njit(
+@njit(
     [
         float64(float64[:], float64[:]),
     ]
@@ -17,7 +16,7 @@ def _inner_product(vec1: np.ndarray, vec2: np.ndarray) -> float:
     return np.sum(vec1 * vec2)
 
 
-@numba.njit(
+@njit(
     [
         float64(float64[:]),
     ]
@@ -29,7 +28,7 @@ def _norm_squared(vec: np.ndarray) -> float:
     return _inner_product(vec, vec)
 
 
-@numba.njit(
+@njit(
     [
         boolean(float64[:, :], float64[:, :], float64),
     ]
@@ -47,9 +46,9 @@ def lovasz_condition(basis: np.ndarray, mu: np.ndarray, delta: float) -> bool:
     return True
 
 
-@numba.njit(
+@njit(
     [
-        numba.types.Tuple((float64[:, :], float64[:, :]))(float64[:, :]),
+        types.Tuple((float64[:, :], float64[:, :]))(float64[:, :]),
     ]
 )
 def gramschmidt_process_unnormalized(
@@ -83,11 +82,12 @@ def gramschmidt_process_unnormalized(
     return basis_star, mu
 
 
-@numba.njit(
+@njit(
     [
         float64[:, :](float64[:, :], float64),
-        float64[:, :](float64[:, :], numba.types.Omitted(0.75)),
-    ]
+        float64[:, :](float64[:, :], types.Omitted(0.75)),
+    ],
+    cache=True,
 )
 def lattice_basis_reduction(basis: np.ndarray, delta: float = 0.75) -> np.ndarray:
     """
