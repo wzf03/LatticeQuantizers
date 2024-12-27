@@ -1,5 +1,5 @@
 import argparse
-import time
+import datetime
 from pathlib import Path
 
 import numpy as np
@@ -81,7 +81,7 @@ def main():
 
     B = optimzer.optimize()
     np.savetxt(
-        output_dir / f"quantizer_{args.dimension}_{round(time.time())}.txt",
+        output_dir / f"quantizer_{args.dimension}_{datetime.datetime.now()}.txt",
         B,
     )
 

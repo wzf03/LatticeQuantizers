@@ -2,7 +2,7 @@ import numpy as np
 from tqdm import tqdm
 
 from lattice_quantizer.algorithm import closest_lattice_point as clp
-from lattice_quantizer.algorithm import lattice_basic_reduction as lbr
+from lattice_quantizer.algorithm import lattice_basis_reduction as lbr
 
 
 class SGDLatticeQuantizerOptimizer:
@@ -75,7 +75,7 @@ class SGDLatticeQuantizerOptimizer:
         is the Lenstra-Lenstra-Lov ́asz algorithm [24, Fig. 1], which we apply in
         this work. In the context of (2), reduction corresponds to finding a suitable U .
         """
-        return lbr.red(basis)
+        return lbr.lattice_basis_reduction(basis)
 
     def optimize(self) -> np.ndarray:
         n = self.dimension
