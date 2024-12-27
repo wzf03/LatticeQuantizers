@@ -7,7 +7,8 @@ from numba import boolean, float64, njit, types
 @njit(
     [
         float64(float64[:], float64[:]),
-    ]
+    ],
+    inline="always",
 )
 def _inner_product(vec1: np.ndarray, vec2: np.ndarray) -> float:
     """
@@ -19,7 +20,8 @@ def _inner_product(vec1: np.ndarray, vec2: np.ndarray) -> float:
 @njit(
     [
         float64(float64[:]),
-    ]
+    ],
+    inline="always",
 )
 def _norm_squared(vec: np.ndarray) -> float:
     """
@@ -31,7 +33,8 @@ def _norm_squared(vec: np.ndarray) -> float:
 @njit(
     [
         boolean(float64[:, :], float64[:, :], float64),
-    ]
+    ],
+    cache=True,
 )
 def lovasz_condition(basis: np.ndarray, mu: np.ndarray, delta: float) -> bool:
     """
@@ -49,7 +52,8 @@ def lovasz_condition(basis: np.ndarray, mu: np.ndarray, delta: float) -> bool:
 @njit(
     [
         types.Tuple((float64[:, :], float64[:, :]))(float64[:, :]),
-    ]
+    ],
+    cache=True,
 )
 def gramschmidt_process_unnormalized(
     basis: np.ndarray,

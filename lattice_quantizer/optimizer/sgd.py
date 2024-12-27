@@ -100,7 +100,7 @@ def _step(
         basis[i, i] -= mu * (y[i] * e[i] - np.sum(e**2) / (n * basis[i, i]))
 
     if t % reduction_interval == reduction_interval - 1:
-        basis = _orth(_red(basis))
+        basis[:] = _orth(_red(basis))
         volume = np.prod(np.diag(basis))
         basis[:] = (volume ** (-1 / n)) * basis
 
