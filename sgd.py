@@ -115,6 +115,7 @@ def main():
         reduction_interval = args.reduction_interval
         output_suffix += f"_Tr[{args.reduction_interval}]"
 
+    from lattice_quantizer.criteria.nsm import nsm_cpu
     from lattice_quantizer.optimizer import SGDLatticeQuantizerOptimizer
 
     optimzer = SGDLatticeQuantizerOptimizer(
@@ -126,8 +127,11 @@ def main():
     )
 
     result = optimzer.optimize()
+    nsm, var = nsm_cpu(result, 100000, 1024, np.random.default_rng())
+    output_suffix += f"_nsm[{np.format_float_positional(nsm, 5)}]_var[{np.format_float_scientific(var, 3)}]"
     np.savetxt(
-        output_dir / f"quantizer_{output_suffix}_{datetime.datetime.now()}.txt",
+        output_dir
+        / f"quantizer_{output_suffix}_{datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.txt",
         result,
     )
 

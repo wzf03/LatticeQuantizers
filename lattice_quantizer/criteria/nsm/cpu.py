@@ -15,7 +15,7 @@ def _sample(
 
 
 @njit(
-    [float64(float64[:, :], int32, int32, types.npy_rng)],
+    [types.Tuple((float64, float64))(float64[:, :], int32, int32, types.npy_rng)],
     parallel=True,
     cache=True,
 )
@@ -29,10 +29,13 @@ def nsm_cpu(
     g = np.zeros(num_samples)
     v = np.prod(np.diag(basis))
     basis = v ** (-1 / n) * basis
+
     for i in range(0, num_samples, batch_size):
         batch = min(batch_size, num_samples - i)
         z = rng.random((batch, n))
         for j in prange(batch):
             g[i + j] = _sample(basis, z[j]) / n
 
-    return np.mean(g)
+    nsm = np.mean(g)
+    var = (np.mean(g**2) - nsm**2) / (num_samples - 1)
+    return nsm, var
