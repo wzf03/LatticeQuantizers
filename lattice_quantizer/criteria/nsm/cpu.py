@@ -46,7 +46,8 @@ def is_closest_to_origin(neighbors: List[np.ndarray], point: np.ndarray) -> bool
 def sample_batch(
     batch_size: int, d: int, max_norm: float, neighbors: List[np.ndarray]
 ) -> np.ndarray:
-    points = np.random.uniform(-max_norm, max_norm, size=(batch_size, d))
+    rng = np.random.default_rng()
+    points = rng.uniform(-max_norm, max_norm, size=(batch_size, d))
     mask = np.apply_along_axis(lambda x: is_closest_to_origin(neighbors, x), 1, points)
     return points[mask]
 

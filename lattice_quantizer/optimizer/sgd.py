@@ -19,6 +19,7 @@ class SGDLatticeQuantizerOptimizer:
         self.radio = radio
         self.steps = steps
         self.reduction_interval = reduction_interval
+        self.rng = np.random.default_rng()
 
     def gran(self):
         """
@@ -26,7 +27,7 @@ class SGDLatticeQuantizerOptimizer:
         each with a Gaussian zero-mean, unit-variance distribution. We use the
         Gaussian random number generator by Paley and Wiener
         """
-        return np.random.randn(self.dimension, self.dimension)
+        return self.rng.normal(0, 1, (self.dimension, self.dimension))
 
     def uran(self):
         """
@@ -36,7 +37,7 @@ class SGDLatticeQuantizerOptimizer:
         We use the permuted congruential generator, which is well documented
         and fulfills advanced tests of randomness.
         """
-        return np.random.rand(self.dimension)
+        return self.rng.random(self.dimension)
 
     def clp(self, G, r):
         """

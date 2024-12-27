@@ -13,9 +13,7 @@ def check_orthogonality(vec1, vec2):
     Checks for orthogonality given 2 vectors by computing dot product. Used in
     test cases for Gram-Schmidt.
     """
-    if dot_product(vec1, vec2) == 0:
-        return True
-    return False
+    return dot_product(vec1, vec2) == 0
 
 
 def gramschmidt(V):

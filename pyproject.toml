@@ -39,6 +39,8 @@ extend-select = [
 ignore = [
     "PLR09",   # Too many X
     "PLR2004", # Magic comparison
+    "EM101",   # Exception message
+    "E741",    # Ambiguous variable name
 ]
 
 [tool.ruff.lint.per-file-ignores]
