@@ -50,7 +50,7 @@ class SGDLatticeQuantizerOptimizer:
         with positive diagonal elements, which is exactly how lattices are represented
         in Algorithm 1.
         """
-        return clp.new_G_based_lattices(G, r)
+        return clp.closest_lattice_point(G, r)
 
     def orth(self, x):
         """
