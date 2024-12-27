@@ -1,7 +1,7 @@
 import multiprocessing as mp
 from functools import partial
 from itertools import product
-from typing import Tuple, List
+from typing import List, Tuple
 
 import numpy as np
 from tqdm import tqdm
@@ -24,8 +24,7 @@ def find_neighboring_points(
         v = B @ np.array(coeff)
         neighbors.append(v)
         norm = np.linalg.norm(v)
-        if norm > max_norm:
-            max_norm = norm
+        max_norm = max(norm, max_norm)
 
     return neighbors, max_norm
 

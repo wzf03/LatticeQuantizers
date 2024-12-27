@@ -1,5 +1,5 @@
-import numpy as np
 import numba
+import numpy as np
 
 
 def validate_input(G, r):

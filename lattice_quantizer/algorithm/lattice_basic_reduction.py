@@ -15,8 +15,7 @@ def check_orthogonality(vec1, vec2):
     """
     if dot_product(vec1, vec2) == 0:
         return True
-    else:
-        return False
+    return False
 
 
 def gramschmidt(V):

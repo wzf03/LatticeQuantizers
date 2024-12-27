@@ -1,5 +1,6 @@
-import lattice_quantizer.algorithm.closest_lattice_point as clp
 import numpy as np
+
+import lattice_quantizer.algorithm.closest_lattice_point as clp
 
 
 def test_clp_ngbl():

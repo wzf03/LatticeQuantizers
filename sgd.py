@@ -1,7 +1,8 @@
 import argparse
-import numpy as np
-from pathlib import Path
 import time
+from pathlib import Path
+
+import numpy as np
 
 from lattice_quantizer.optimizer import SGDLatticeQuantizerOptimizer
 
