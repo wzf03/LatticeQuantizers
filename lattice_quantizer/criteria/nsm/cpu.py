@@ -1,5 +1,5 @@
 import numpy as np
-from numba import float64, int32, njit, prange, types
+from numba import float64, int32, int64, njit, prange, types
 
 from lattice_quantizer.algorithm import closest_lattice_point as clp
 
@@ -15,7 +15,7 @@ def _sample(
 
 
 @njit(
-    [types.Tuple((float64, float64))(float64[:, :], int32, int32, types.npy_rng)],
+    [types.Tuple((float64, float64))(float64[:, :], int64, int32, types.npy_rng)],
     parallel=True,
     cache=True,
 )
@@ -26,23 +26,28 @@ def _nsm_cpu_batched(
     rng: np.random.Generator,
 ) -> float:
     n = basis.shape[0]
-    g = np.zeros(num_samples)
+
     v = np.prod(np.diag(basis))
     basis = v ** (-1 / n) * basis
+    g_mean = 0.0
+    g2_mean = 0.0
 
     for i in range(0, num_samples, batch_size):
         batch = min(batch_size, num_samples - i)
+        g = np.zeros(batch_size)
         z = rng.random((batch, n))
         for j in prange(batch):
-            g[i + j] = _sample(basis, z[j]) / n
+            g[j] = _sample(basis, z[j]) / n
+        g_mean += np.mean(g) * (batch / num_samples)
+        g2_mean += np.mean(g**2) * (batch / num_samples)
 
-    nsm = np.mean(g)
-    var = (np.mean(g**2) - nsm**2) / (num_samples - 1)
+    nsm = g_mean
+    var = (g2_mean - nsm**2) / (num_samples - 1)
     return nsm, var
 
 
 @njit(
-    [types.Tuple((float64, float64))(float64[:, :], int32, types.npy_rng)],
+    [types.Tuple((float64, float64))(float64[:, :], int64, types.npy_rng)],
     cache=True,
 )
 def _nsm_cpu(
