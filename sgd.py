@@ -127,7 +127,7 @@ def main():
     )
 
     result = optimzer.optimize()
-    nsm, var = nsm_cpu(result, 100000, 1024, np.random.default_rng())
+    nsm, var = nsm_cpu(result, 100000, np.random.default_rng(), 1024)
     output_suffix += f"_nsm[{np.format_float_positional(nsm, 5)}]_var[{np.format_float_scientific(var, 3)}]"
     np.savetxt(
         output_dir
