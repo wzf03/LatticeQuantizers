@@ -4,7 +4,7 @@ from numba import float64, int32, int64, njit, prange, types
 from lattice_quantizer.algorithm import closest_lattice_point as clp
 
 
-@njit(inline="always", parallel=False)
+@njit(inline="always")
 def _sample(
     basis: np.ndarray,
     z: np.ndarray,
@@ -28,7 +28,7 @@ def _nsm_cpu_batched(
     n = basis.shape[0]
 
     v = np.prod(np.diag(basis))
-    basis = v ** (-1 / n) * basis
+    coeffi = v ** (-2 / n) / n
     g_mean = 0.0
     g2_mean = 0.0
 
@@ -37,7 +37,7 @@ def _nsm_cpu_batched(
         g = np.zeros(batch_size)
         z = rng.random((batch, n))
         for j in prange(batch):
-            g[j] = _sample(basis, z[j]) / n
+            g[j] = _sample(basis, z[j]) * coeffi
         g_mean += np.mean(g) * (batch / num_samples)
         g2_mean += np.mean(g**2) * (batch / num_samples)
 
@@ -58,11 +58,11 @@ def _nsm_cpu(
     n = basis.shape[0]
     g = np.zeros(num_samples)
     v = np.prod(np.diag(basis))
-    basis = v ** (-1 / n) * basis
+    coeffi = v ** (-2 / n) / n  # Note: V = det(B), not V = sqrt(det(B)) in the paper
 
     for i in prange(num_samples):
         z = rng.random(n)
-        g[i] = _sample(basis, z) / n
+        g[i] = _sample(basis, z) * coeffi
 
     nsm = np.mean(g)
     var = (np.mean(g**2) - nsm**2) / (num_samples - 1)
