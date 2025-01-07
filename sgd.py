@@ -58,6 +58,14 @@ def parse_arg() -> argparse.Namespace:
         required=False,
         help="Interval between consecutive reductions",
     )
+    
+    parser.add_argument(
+        "-b",
+        "--batch_size",
+        type=int,
+        default=8,
+        help="Batch size for the stochastic gradient descent",
+    )
 
     parser.add_argument(
         "--output_dir",
@@ -124,6 +132,7 @@ def main():
         radio,
         steps,
         reduction_interval,
+        args.batch_size,
     )
 
     result = optimzer.optimize()

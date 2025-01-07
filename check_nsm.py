@@ -6,7 +6,7 @@ import numpy as np
 def parse_args():
     parser = argparse.ArgumentParser(description="Check NSM")
 
-    parser.add_argument("basis", type=str, help="Basis")
+    parser.add_argument("--basis", type=str, help="Basis")
     parser.add_argument(
         "--num_samples", type=float, default=1e12, help="Number of samples"
     )

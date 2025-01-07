@@ -78,6 +78,32 @@ def _init_basis(rng: np.random.Generator, n: int) -> np.ndarray:
     return (volume ** (-1 / n)) * basis
 
 
+# @njit(cache=True)
+# def _step(
+#     n: int,
+#     basis: np.ndarray,
+#     t: int,
+#     rng: np.random.Generator,
+#     mu0: float,
+#     radio: float,
+#     total_steps: int,
+#     reduction_interval: int,
+# ):
+#     mu = mu0 * (radio ** -(t / (total_steps - 1)))
+#     z = _uran(rng, n)
+#     y = z - _clp(basis, z @ basis)
+#     e = y @ basis
+
+#     for i in range(n):
+#         for j in range(i):
+#             basis[i, j] -= mu * y[i] * e[j]
+#         basis[i, i] -= mu * (y[i] * e[i] - np.sum(e**2) / (n * basis[i, i]))
+
+#     if t % reduction_interval == reduction_interval - 1:
+#         basis[:] = _orth(_red(basis))
+#         volume = np.prod(np.diag(basis))
+#         basis[:] = (volume ** (-1 / n)) * basis
+
 @njit(cache=True)
 def _step(
     n: int,
@@ -88,22 +114,27 @@ def _step(
     radio: float,
     total_steps: int,
     reduction_interval: int,
-):
+    batch_size: int,
+):  
     mu = mu0 * (radio ** -(t / (total_steps - 1)))
-    z = _uran(rng, n)
-    y = z - _clp(basis, z @ basis)
-    e = y @ basis
+    batch_y= np.zeros((batch_size, n))
+    batch_e = np.zeros((batch_size, n))
+    for k in range(batch_size):
+        z = _uran(rng, n)
+        y = z - _clp(basis, z @ basis)
+        e = y @ basis
+        batch_y[k] = y
+        batch_e[k] = e
 
     for i in range(n):
         for j in range(i):
-            basis[i, j] -= mu * y[i] * e[j]
-        basis[i, i] -= mu * (y[i] * e[i] - np.sum(e**2) / (n * basis[i, i]))
+            basis[i, j] -= mu * np.sum(batch_y[:, i] * batch_e[:, j])/batch_size
+        basis[i, i] -= mu * (np.sum(batch_y[:, i] * batch_e[:, i]) - np.sum(batch_e**2) / (n * basis[i, i]))/batch_size
 
     if t % reduction_interval == reduction_interval - 1:
         basis[:] = _orth(_red(basis))
         volume = np.prod(np.diag(basis))
         basis[:] = (volume ** (-1 / n)) * basis
-
 
 @njit(cache=True)
 def _step_n(
@@ -116,9 +147,10 @@ def _step_n(
     radio: float,
     total_steps: int,
     reduction_interval: int,
+    batch_size: int,
 ):
     for _ in range(steps):
-        _step(n, basis, t, rng, mu0, radio, total_steps, reduction_interval)
+        _step(n, basis, t, rng, mu0, radio, total_steps, reduction_interval,batch_size)
         t += 1
 
 
@@ -131,6 +163,7 @@ class SGDLatticeQuantizerOptimizer:
         steps: int = 10_000_000,
         reduction_interval: int = 100,
         log_interval: int = 10000,
+        batch_size: int = 8,
     ):
         self.dimension = dimension
         self.initial_step_size = initial_step_size
@@ -138,6 +171,7 @@ class SGDLatticeQuantizerOptimizer:
         self.steps = steps
         self.reduction_interval = reduction_interval
         self.log_interval = log_interval
+        self.batch_size = batch_size
 
         self.rng = np.random.default_rng()
 
@@ -158,6 +192,7 @@ class SGDLatticeQuantizerOptimizer:
                 self.radio,
                 self.steps,
                 self.reduction_interval,
+                self.batch_size,
             )
             pbar.update(steps)
             t += steps
