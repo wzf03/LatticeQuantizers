@@ -1,6 +1,8 @@
 .DS_Store
 *.sh 
 *.zip
+logs/
+debug/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

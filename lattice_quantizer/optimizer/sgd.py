@@ -2,6 +2,7 @@ from typing import Tuple
 
 import numpy as np
 from numba import float64, int32, int64, njit, types
+from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
 from lattice_quantizer.algorithm import closest_lattice_point as clp
@@ -179,6 +180,7 @@ class SGDLatticeQuantizerOptimizer:
         reduction_interval: int = 100,
         log_interval: int = 10000,
         batch_size: int = 8,
+        log_dir: str = "logs",
     ):
         self.dimension = dimension
         self.initial_step_size = initial_step_size
@@ -189,6 +191,7 @@ class SGDLatticeQuantizerOptimizer:
         self.batch_size = batch_size
 
         self.rng = np.random.default_rng()
+        self.writer = SummaryWriter(log_dir=log_dir)
 
     def optimize(self) -> np.ndarray:
         basis = _init_basis(self.rng, self.dimension)
@@ -213,4 +216,7 @@ class SGDLatticeQuantizerOptimizer:
             pbar.set_postfix({"nsm": f"{nsm:.4f}"})
             t += steps
 
+            self.writer.add_scalar("nsm", nsm, i)
+
+        self.writer.close()
         return basis
