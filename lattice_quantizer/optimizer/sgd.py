@@ -124,23 +124,26 @@ def _step(
     total_steps: int,
     reduction_interval: int,
     batch_size: int,
-):
+) -> float:
     # Scheduler
     mu = mu0 * (radio ** -(t / (total_steps - 1)))
+    volume = np.prod(np.diag(basis))
 
     # Generate data
     batch_x = _uran(rng, n, batch_size)
 
     # Forward and backward pass
     batch_y, batch_e = _forward(batch_x, basis)
+    loss = np.sum(batch_e**2) / batch_size / (n * volume ** (2 / n))
     gradient = _backward(batch_y, batch_e, basis)
 
     # Update basis
     basis[:] -= mu * (gradient / batch_size)
     if t % reduction_interval == reduction_interval - 1:
         basis[:] = _orth(_red(basis))
-        volume = np.prod(np.diag(basis))
         basis[:] = (volume ** (-1 / n)) * basis
+
+    return loss
 
 
 @njit(cache=True)
@@ -155,10 +158,15 @@ def _step_n(
     total_steps: int,
     reduction_interval: int,
     batch_size: int,
-):
+) -> float:
+    nsm = 0.0
     for _ in range(steps):
-        _step(n, basis, t, rng, mu0, radio, total_steps, reduction_interval, batch_size)
+        loss = _step(
+            n, basis, t, rng, mu0, radio, total_steps, reduction_interval, batch_size
+        )
+        nsm += 1 / steps * loss
         t += 1
+    return nsm
 
 
 class SGDLatticeQuantizerOptimizer:
@@ -189,7 +197,7 @@ class SGDLatticeQuantizerOptimizer:
 
         for i in range(0, self.steps, self.log_interval):
             steps = min(self.log_interval, self.steps - i)
-            _step_n(
+            nsm = _step_n(
                 steps,
                 self.dimension,
                 basis,
@@ -202,6 +210,7 @@ class SGDLatticeQuantizerOptimizer:
                 self.batch_size,
             )
             pbar.update(steps)
+            pbar.set_postfix({"nsm": f"{nsm:.4f}"})
             t += steps
 
         return basis
