@@ -58,7 +58,7 @@ def parse_arg() -> argparse.Namespace:
         required=False,
         help="Interval between consecutive reductions",
     )
-    
+
     parser.add_argument(
         "-b",
         "--batch_size",
@@ -122,6 +122,8 @@ def main():
     if args.reduction_interval is not None:
         reduction_interval = args.reduction_interval
         output_suffix += f"_Tr[{args.reduction_interval}]"
+
+    output_suffix += f"_b[{args.batch_size}]"
 
     from lattice_quantizer.criteria.nsm import nsm_cpu
     from lattice_quantizer.optimizer import SGDLatticeQuantizerOptimizer

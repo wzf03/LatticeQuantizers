@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 from numba import float64, int32, int64, njit, types
 from tqdm import tqdm
@@ -16,8 +18,8 @@ def _gran(rng: np.random.Generator, n: int) -> np.ndarray:
     return rng.normal(0, 1, (n, n))
 
 
-@njit(float64[:](types.npy_rng, int32), inline="always")
-def _uran(rng: np.random.Generator, n: int) -> np.ndarray:
+@njit(float64[:, :](types.npy_rng, int32, int32), inline="always")
+def _uran(rng: np.random.Generator, n: int, batch: int = 1) -> np.ndarray:
     """
     URAN (n) returns n random real numbers, which are uniformly distributed
     in [0, 1) and independent of each other. Interpreted as a vector, URAN (n)
@@ -25,7 +27,7 @@ def _uran(rng: np.random.Generator, n: int) -> np.ndarray:
     We use the permuted congruential generator, which is well documented
     and fulfills advanced tests of randomness.
     """
-    return rng.random(n)
+    return rng.random((batch, n))
 
 
 @njit(int64[:](float64[:, :], float64[:]), inline="always")
@@ -78,6 +80,39 @@ def _init_basis(rng: np.random.Generator, n: int) -> np.ndarray:
     return (volume ** (-1 / n)) * basis
 
 
+@njit(inline="always")
+def _forward(
+    z: np.ndarray,
+    basis: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray]:
+    y_batch = np.empty_like(z)
+    e_batch = np.empty_like(z)
+
+    for i in range(z.shape[0]):
+        y_batch[i] = z[i] - _clp(basis, z[i] @ basis)
+        e_batch[i] = y_batch[i] @ basis
+
+    return y_batch, e_batch
+
+
+@njit(inline="always")
+def _backward(
+    y: np.ndarray,
+    e: np.ndarray,
+    basis: np.ndarray,
+) -> np.ndarray:
+    gradient = np.zeros_like(basis)
+    n = basis.shape[0]
+    for i in range(y.shape[0]):
+        for j in range(n):
+            for k in range(j):
+                gradient[j, k] += y[i, j] * e[i, k]
+            gradient[j, j] += y[i, j] * e[i, j] - (
+                np.sum(e[i] ** 2) / (n * basis[j, j])
+            )
+    return gradient
+
+
 @njit(cache=True)
 def _step(
     n: int,
@@ -90,29 +125,18 @@ def _step(
     reduction_interval: int,
     batch_size: int,
 ):
+    # Scheduler
     mu = mu0 * (radio ** -(t / (total_steps - 1)))
-    batch_y = np.zeros((batch_size, n))
-    batch_e = np.zeros((batch_size, n))
-    for k in range(batch_size):
-        z = _uran(rng, n)
-        y = z - _clp(basis, z @ basis)
-        e = y @ basis
 
-        batch_y[k] = y
-        batch_e[k] = e
+    # Generate data
+    batch_x = _uran(rng, n, batch_size)
 
-    for i in range(n):
-        for j in range(i):
-            basis[i, j] -= mu * np.sum(batch_y[:, i] * batch_e[:, j]) / batch_size
-        basis[i, i] -= (
-            mu
-            * (
-                np.sum(batch_y[:, i] * batch_e[:, i])
-                - np.sum(batch_e**2) / (n * basis[i, i])
-            )
-            / batch_size
-        )
+    # Forward and backward pass
+    batch_y, batch_e = _forward(batch_x, basis)
+    gradient = _backward(batch_y, batch_e, basis)
 
+    # Update basis
+    basis[:] -= mu * (gradient / batch_size)
     if t % reduction_interval == reduction_interval - 1:
         basis[:] = _orth(_red(basis))
         volume = np.prod(np.diag(basis))
