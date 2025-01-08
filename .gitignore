@@ -1,5 +1,5 @@
 .DS_Store
-*.sh 
+*.sh
 *.zip
 logs/
 debug/

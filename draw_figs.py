@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -40,6 +40,7 @@ ax1.set_ylabel("NSM(steps)", color="black")
 
 plt.show()
 
-os.makedirs("./figures", exist_ok=True)
+figures_path = Path("./figures")
+figures_path.mkdir(parents=True, exist_ok=True)
 
-fig.savefig(fname="./figures/ep_len_mean" + ".pdf", format="pdf")
+fig.savefig(fname=figures_path / "ep_len_mean.pdf", format="pdf")

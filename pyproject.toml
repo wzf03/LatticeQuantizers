@@ -5,12 +5,12 @@ build-backend = "hatchling.build"
 [project]
 name = "lattice_quantizer"
 version = "0.0.1"
-dependencies = ["numpy", "numba", "tqdm", "scipy"]
+dependencies = ["numpy", "numba", "tqdm", "scipy", "tensorboard"]
 requires-python = ">=3.8"
 
 [project.optional-dependencies]
 test = ["pytest"]
-cuda = ["cupy"]
+plt = ["matplotlib", "pandas"]
 
 [tool.ruff.lint]
 extend-select = [
