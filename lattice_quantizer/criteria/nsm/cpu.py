@@ -56,11 +56,12 @@ def _nsm_cpu(
     rng: np.random.Generator,
 ) -> float:
     n = basis.shape[0]
+
     g = np.zeros(num_samples)
     v = np.prod(np.diag(basis))
-    coeffi = v ** (-2 / n) / n  # Note: V = det(B), not V = sqrt(det(B)) in the paper
+    coeffi = v ** (-2 / n) / n
 
-    for i in prange(num_samples):
+    for i in range(num_samples):
         z = rng.random(n)
         g[i] = _sample(basis, z) * coeffi
 

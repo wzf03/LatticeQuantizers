@@ -1,0 +1,13 @@
+optimizer:
+  steps: 100_000_000
+  reduction_interval: 100
+  batch_size: 1
+  lr_scheduler:
+    class_path: RatioLR
+    init_args:
+      peak_lr: 0.0005
+      ratio: 1000
+  log_interval: 10000
+output_dir: results
+checknsm_num_samples: 1000000
+checknsm_parallel: true
