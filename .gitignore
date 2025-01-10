@@ -3,7 +3,7 @@
 *.zip
 # logs/
 debug/
-results_batch[8]/
+results_batch_8/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
