@@ -5,7 +5,14 @@ build-backend = "hatchling.build"
 [project]
 name = "lattice_quantizer"
 version = "0.0.1"
-dependencies = ["numpy", "numba", "tqdm", "scipy", "tensorboard"]
+dependencies = [
+    "numpy",
+    "numba",
+    "tqdm",
+    "scipy",
+    "tensorboardX",
+    "jsonargparse[signatures]",
+]
 requires-python = ">=3.8"
 
 [project.optional-dependencies]

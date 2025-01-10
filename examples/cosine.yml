@@ -1,0 +1,16 @@
+optimizer:
+  steps: 5_000_000
+  reduction_interval: 100
+  batch_size: 1
+  lr_scheduler:
+    class_path: CosineLR
+    init_args:
+      base_lr: 0.008
+      final_lr: 0.000001
+      warmup_steps: 50000
+      max_update: 1_000_000
+  log_interval: 10000
+output_dir: results
+checknsm_num_samples: 1000000
+checknsm_parallel: true
+

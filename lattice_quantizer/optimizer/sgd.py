@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Callable, Tuple
 
 import numpy as np
 from numba import float64, int32, int64, njit, types
@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from lattice_quantizer.algorithm import closest_lattice_point as clp
 from lattice_quantizer.algorithm import lattice_basis_reduction as lbr
+from lattice_quantizer.lr_scheduler import LRScheduler, RatioLR
 
 
 @njit(float64[:, :](types.npy_rng, int32), inline="always")
@@ -118,31 +119,23 @@ def _backward(
 def _step(
     n: int,
     basis: np.ndarray,
-    t: int,
     rng: np.random.Generator,
-    mu0: float,
-    radio: float,
-    total_steps: int,
-    reduction_interval: int,
+    lr: float,
     batch_size: int,
 ) -> float:
-    # Scheduler
-    mu = mu0 * (radio ** -(t / (total_steps - 1)))
-    volume = np.prod(np.diag(basis))
-
     # Generate data
     batch_x = _uran(rng, n, batch_size)
 
     # Forward and backward pass
     batch_y, batch_e = _forward(batch_x, basis)
+
+    volume = np.prod(np.diag(basis))
     loss = np.sum(batch_e**2) / batch_size / (n * volume ** (2 / n))
+
     gradient = _backward(batch_y, batch_e, basis)
 
     # Update basis
-    basis[:] -= mu * (gradient / batch_size)
-    if t % reduction_interval == reduction_interval - 1:
-        basis[:] = _orth(_red(basis))
-        basis[:] = (volume ** (-1 / n)) * basis
+    basis[:] -= lr * (gradient / batch_size)
 
     return loss
 
@@ -154,69 +147,70 @@ def _step_n(
     basis: np.ndarray,
     t: int,
     rng: np.random.Generator,
-    mu0: float,
-    radio: float,
-    total_steps: int,
     reduction_interval: int,
     batch_size: int,
+    lr_scheduler: Callable[[int], float],
 ) -> float:
     nsm = 0.0
     for _ in range(steps):
-        loss = _step(
-            n, basis, t, rng, mu0, radio, total_steps, reduction_interval, batch_size
-        )
+        lr = lr_scheduler(t)
+        loss = _step(n, basis, rng, lr, batch_size)
         nsm += 1 / steps * loss
+
+        if t % reduction_interval == reduction_interval - 1:
+            basis[:] = _orth(_red(basis))
+            volume = np.prod(np.diag(basis))
+            basis[:] = (volume ** (-1 / n)) * basis
         t += 1
     return nsm
+
+
+DEFAULT_LR_SCHEDULER = RatioLR(0.001, ratio=500)
 
 
 class SGDLatticeQuantizerOptimizer:
     def __init__(
         self,
-        dimension: int,
-        initial_step_size: float = 0.001,
-        radio: int = 500,
         steps: int = 10_000_000,
         reduction_interval: int = 100,
-        log_interval: int = 10000,
+        lr_scheduler: LRScheduler = DEFAULT_LR_SCHEDULER,
         batch_size: int = 8,
+        log_interval: int = 10000,
         log_dir: str = "logs",
     ):
-        self.dimension = dimension
-        self.initial_step_size = initial_step_size
-        self.radio = radio
         self.steps = steps
         self.reduction_interval = reduction_interval
         self.log_interval = log_interval
         self.batch_size = batch_size
+        self.lr_scheduler = lr_scheduler
 
         self.rng = np.random.default_rng()
-        self.writer = SummaryWriter(log_dir=log_dir)
+        self.log_dir = log_dir
 
-    def optimize(self) -> np.ndarray:
-        basis = _init_basis(self.rng, self.dimension)
+    def optimize(self, dimension: int) -> np.ndarray:
+        basis = _init_basis(self.rng, dimension)
         t = 0
+        lr_scheduler = self.lr_scheduler.get_lr_scheduler(self.steps)
         pbar = tqdm(total=self.steps, desc="Optimizing")
+        writer = SummaryWriter(log_dir=self.log_dir)
 
         for i in range(0, self.steps, self.log_interval):
             steps = min(self.log_interval, self.steps - i)
             nsm = _step_n(
-                steps,
-                self.dimension,
-                basis,
-                t,
-                self.rng,
-                self.initial_step_size,
-                self.radio,
-                self.steps,
-                self.reduction_interval,
-                self.batch_size,
+                steps=steps,
+                n=dimension,
+                basis=basis,
+                t=t,
+                rng=self.rng,
+                reduction_interval=self.reduction_interval,
+                batch_size=self.batch_size,
+                lr_scheduler=lr_scheduler,
             )
             pbar.update(steps)
             pbar.set_postfix({"nsm": f"{nsm:.4f}"})
             t += steps
 
-            self.writer.add_scalar("nsm", nsm, i)
+            writer.add_scalar("train/nsm", nsm, i)
 
-        self.writer.close()
+        writer.close()
         return basis
