@@ -14,8 +14,8 @@ def tensorboard_smoothing(x, smooth=0.6):
 
 
 fig, ax1 = plt.subplots(1, 1)  # a figure with a 2x1 grid of Axes
-len_mean_single = pd.read_csv("quantizer_12_medium_b[1].csv")
-len_mean_batch = pd.read_csv("quantizer_12_medium_b[8].csv")
+len_mean_single = pd.read_csv("./logs/quantizer_12_medium_v[1000]_T[1000000]_b[1].csv")
+len_mean_batch = pd.read_csv("./logs/quantizer_12_medium_v[1000]_T[1000000]_b[8].csv")
 
 ax1.spines["top"].set_visible(False)
 ax1.spines["right"].set_visible(False)
@@ -43,4 +43,4 @@ plt.show()
 figures_path = Path("./figures")
 figures_path.mkdir(parents=True, exist_ok=True)
 
-fig.savefig(fname=figures_path / "ep_len_mean.pdf", format="pdf")
+fig.savefig(fname=figures_path / "compare.pdf", format="pdf")

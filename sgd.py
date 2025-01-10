@@ -81,6 +81,13 @@ def parse_arg() -> argparse.Namespace:
         help="Interval between consecutive logs",
     )
 
+    parser.add_argument(
+        "--log_dir",
+        type=str,
+        default="logs",
+        help="Directory to save the logs",
+    )
+
     return parser.parse_args()
 
 
@@ -135,7 +142,7 @@ def main():
     from lattice_quantizer.criteria.nsm import nsm_cpu
     from lattice_quantizer.optimizer import SGDLatticeQuantizerOptimizer
 
-    logdir = f"logs/quantizer_{output_suffix}"
+    logdir = f"{args.log_dir}/quantizer_{output_suffix}"
 
     optimzer = SGDLatticeQuantizerOptimizer(
         args.dimension,
