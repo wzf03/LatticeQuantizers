@@ -28,7 +28,7 @@ def main(
         result,
         checknsm_num_samples,
         np.random.default_rng(),
-        0 if checknsm_parallel else 65536,
+        65536 if checknsm_parallel else 0,
     )
     np.savetxt(
         output_subdir / "basis.txt",
