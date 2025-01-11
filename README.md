@@ -20,5 +20,7 @@ And we use `draw_figs.py` to draw the figures of the comparison of the NSM of di
 We put all the results in the `data` directory, including the generation matrix of the lattices with settings:
 - dimension $[1,25]$, batch size = $1$, default scheduler, i.e. the reproduction of the results in [Optimization and Identification of Lattice Quantizers](https://arxiv.org/abs/2401.01799) 
 - dimension $[1,25]$, batch size = $8$, default scheduler. 
-And the comparison of dimension $12$ lattice convergence between the reproduced algorithm with batch = 1 and the batch algorithm with batch = 8. We obtain the results in the medium mode with the default scheduler ($v = 10$) and timesteps $10^6$.
+- dimension $[1,25]$, batch size = $8$, cosine scheduler. 
+
+And comparison of 12-dimensional and 16-dimensional lattice convergence across three setups: medium mode with batch size 1, medium mode with batch size 8, both using the default scheduler, and cosine mode with batch size 8 using a cosine scheduler. The illustration of the comparison is shown in the `data/compare_12_16.pdf` file.
 
